@@ -51,6 +51,15 @@ const getReferralStatusColor = (status: string) => {
   }
 };
 
+type JobResult = {
+  job_title: string;
+  job_city?: string;
+  job_country?: string;
+  employer_name: string;
+  job_apply_link: string;
+  job_description: string;
+};
+
 function App() {
   const [contacts, setContacts] = useState<Contact[]>([]);
 // Load from localStorage on initial mount
@@ -67,6 +76,9 @@ useEffect(() => {
     localStorage.setItem('referralflow-contacts', JSON.stringify(contacts));
   }
 }, [contacts]);
+const [suggestedJobs, setSuggestedJobs] = useState<JobResult[]>([]);
+const [isLoadingJobs, setIsLoadingJobs] = useState(false);
+const [jobError, setJobError] = useState<string | null>(null);
 
 
   const [name, setName] = useState('');
@@ -172,6 +184,13 @@ const addOrUpdateContact = () => {
     );
   };
 
+  const handleJobSearch = (companyName: string) => {
+    if (companyName.length > 2) {
+      const linkedInJobsUrl = `https://www.linkedin.com/jobs/search/?keywords=${encodeURIComponent(companyName)}`;
+      window.open(linkedInJobsUrl, '_blank');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 px-4 py-10 text-gray-800">
       <div className="max-w-7xl mx-auto">
@@ -216,15 +235,30 @@ const addOrUpdateContact = () => {
               />
             </div>
 
-            <div className="flex flex-col">
+            <div className="flex flex-col relative">
               <label className="text-sm font-medium mb-2 text-gray-700">Company</label>
-              <input
-                type="text"
-                placeholder="e.g. Google"
-                className="px-4 py-2.5 border border-gray-300 rounded-lg shadow-sm text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200"
-                value={company}
-                onChange={(e) => setCompany(e.target.value)}
-              />
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="e.g. Google"
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg shadow-sm text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200"
+                  value={company}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setCompany(value);
+                  }}
+                />
+                {company.length > 2 && (
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => handleJobSearch(company)}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1 bg-blue-100 text-blue-700 rounded-md text-sm font-medium hover:bg-blue-200 transition-colors"
+                  >
+                    View Jobs →
+                  </motion.button>
+                )}
+              </div>
             </div>
 
             <div className="flex flex-col">
