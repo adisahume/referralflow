@@ -51,35 +51,22 @@ const getReferralStatusColor = (status: string) => {
   }
 };
 
-type JobResult = {
-  job_title: string;
-  job_city?: string;
-  job_country?: string;
-  employer_name: string;
-  job_apply_link: string;
-  job_description: string;
-};
-
 function App() {
   const [contacts, setContacts] = useState<Contact[]>([]);
-// Load from localStorage on initial mount
-useEffect(() => {
-  const storedContacts = localStorage.getItem('referralflow-contacts');
-  if (storedContacts) {
-    setContacts(JSON.parse(storedContacts));
-  }
-}, []);
+  // Load from localStorage on initial mount
+  useEffect(() => {
+    const storedContacts = localStorage.getItem('referralflow-contacts');
+    if (storedContacts) {
+      setContacts(JSON.parse(storedContacts));
+    }
+  }, []);
 
-// Save to localStorage every time contacts change
-useEffect(() => {
-  if (contacts.length > 0) {
-    localStorage.setItem('referralflow-contacts', JSON.stringify(contacts));
-  }
-}, [contacts]);
-const [suggestedJobs, setSuggestedJobs] = useState<JobResult[]>([]);
-const [isLoadingJobs, setIsLoadingJobs] = useState(false);
-const [jobError, setJobError] = useState<string | null>(null);
-
+  // Save to localStorage every time contacts change
+  useEffect(() => {
+    if (contacts.length > 0) {
+      localStorage.setItem('referralflow-contacts', JSON.stringify(contacts));
+    }
+  }, [contacts]);
 
   const [name, setName] = useState('');
   const [company, setCompany] = useState('');
@@ -92,10 +79,9 @@ const [jobError, setJobError] = useState<string | null>(null);
   const [showReferralTemplate, setShowReferralTemplate] = useState(false);
   const [notification, setNotification] = useState<string | null>(null);
   const showNotification = (message: string, duration = 3000) => {
-  setNotification(message);
-  setTimeout(() => setNotification(null), duration);
-};
-
+    setNotification(message);
+    setTimeout(() => setNotification(null), duration);
+  };
 
   // Filter states
   const [nameFilter, setNameFilter] = useState('');
@@ -125,29 +111,15 @@ const [jobError, setJobError] = useState<string | null>(null);
     setEditIndex(null);
   };
 
-const addOrUpdateContact = () => {
-  if (!name || !company) {
-    showNotification('❌ Please enter both name and company.');
-    return;
-  }
+  const addOrUpdateContact = () => {
+    if (!name || !company) {
+      showNotification('❌ Please enter both name and company.');
+      return;
+    }
 
-  if (editIndex !== null) {
-    const updated = [...contacts];
-    updated[editIndex] = {
-      name,
-      company,
-      stage,
-      referralStatus,
-      contactDetails,
-      referralMessage,
-      tags: selectedTags,
-    };
-    setContacts(updated);
-    showNotification('✅ Contact updated successfully.');
-  } else {
-    setContacts([
-      ...contacts,
-      {
+    if (editIndex !== null) {
+      const updated = [...contacts];
+      updated[editIndex] = {
         name,
         company,
         stage,
@@ -155,14 +127,27 @@ const addOrUpdateContact = () => {
         contactDetails,
         referralMessage,
         tags: selectedTags,
-      },
-    ]);
-    showNotification('✅ Contact added successfully.');
-  }
+      };
+      setContacts(updated);
+      showNotification('✅ Contact updated successfully.');
+    } else {
+      setContacts([
+        ...contacts,
+        {
+          name,
+          company,
+          stage,
+          referralStatus,
+          contactDetails,
+          referralMessage,
+          tags: selectedTags,
+        },
+      ]);
+      showNotification('✅ Contact added successfully.');
+    }
 
-  resetForm();
-};
-
+    resetForm();
+  };
 
   const startEdit = (index: number) => {
     const c = contacts[index];
@@ -243,16 +228,17 @@ const addOrUpdateContact = () => {
                   placeholder="e.g. Google"
                   className="w-full px-4 py-2.5 border border-gray-300 rounded-lg shadow-sm text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200"
                   value={company}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    setCompany(value);
-                  }}
+                  onChange={(e) => setCompany(e.target.value)}
                 />
                 {company.length > 2 && (
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    onClick={() => handleJobSearch(company)}
+                    onClick={() => {
+                      const linkedInJobsUrl = `https://www.linkedin.com/jobs/search/?keywords=${encodeURIComponent(company)}`;
+                      window.open(linkedInJobsUrl, '_blank');
+                      showNotification('✨ Opening LinkedIn Jobs in a new tab');
+                    }}
                     className="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1 bg-blue-100 text-blue-700 rounded-md text-sm font-medium hover:bg-blue-200 transition-colors"
                   >
                     View Jobs →
