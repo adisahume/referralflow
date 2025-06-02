@@ -53,6 +53,8 @@ const getReferralStatusColor = (status: string) => {
 
 function App() {
   const [contacts, setContacts] = useState<Contact[]>([]);
+  const [showAddForm, setShowAddForm] = useState(false);
+  
   // Load from localStorage on initial mount
   useEffect(() => {
     const storedContacts = localStorage.getItem('referralflow-contacts');
@@ -78,17 +80,19 @@ function App() {
   const [editIndex, setEditIndex] = useState<number | null>(null);
   const [showReferralTemplate, setShowReferralTemplate] = useState(false);
   const [notification, setNotification] = useState<string | null>(null);
-  const showNotification = (message: string, duration = 3000) => {
-    setNotification(message);
-    setTimeout(() => setNotification(null), duration);
-  };
-
+  
   // Filter states
   const [nameFilter, setNameFilter] = useState('');
   const [companyFilter, setCompanyFilter] = useState('');
   const [stageFilter, setStageFilter] = useState<string>('');
   const [statusFilter, setStatusFilter] = useState<string>('');
   const [tagFilter, setTagFilter] = useState<string>('');
+  const [showFilters, setShowFilters] = useState(false);
+
+  const showNotification = (message: string, duration = 3000) => {
+    setNotification(message);
+    setTimeout(() => setNotification(null), duration);
+  };
 
   const filteredContacts = contacts.filter(contact => {
     const nameMatch = contact.name.toLowerCase().includes(nameFilter.toLowerCase());
@@ -109,6 +113,7 @@ function App() {
     setReferralMessage(DEFAULT_REFERRAL_MESSAGE);
     setSelectedTags([]);
     setEditIndex(null);
+    setShowAddForm(false);
   };
 
   const addOrUpdateContact = () => {
@@ -159,6 +164,7 @@ function App() {
     setReferralMessage(c.referralMessage);
     setSelectedTags(c.tags);
     setEditIndex(index);
+    setShowAddForm(true);
   };
 
   const toggleTag = (tag: string) => {
@@ -169,17 +175,10 @@ function App() {
     );
   };
 
-  const handleJobSearch = (companyName: string) => {
-    if (companyName.length > 2) {
-      const linkedInJobsUrl = `https://www.linkedin.com/jobs/search/?keywords=${encodeURIComponent(companyName)}`;
-      window.open(linkedInJobsUrl, '_blank');
-    }
-  };
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 px-4 py-10 text-gray-800">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 px-4 py-6 text-gray-800">
       <div className="max-w-7xl mx-auto">
-        {/* Notification with animation */}
+        {/* Notification */}
         <AnimatePresence>
           {notification && (
             <motion.div
@@ -193,317 +192,349 @@ function App() {
           )}
         </AnimatePresence>
 
-        <motion.h1
+        {/* Header */}
+        <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-4xl font-bold text-center bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600 mb-8"
+          className="flex justify-between items-center mb-6"
         >
-          ReferralFlow Tracker
-        </motion.h1>
-
-        {/* Form Section with animation */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="bg-white border border-gray-200 rounded-xl shadow-lg p-6 mb-8 transition-all duration-300 hover:shadow-xl"
-        >
-          <div className="grid grid-cols-1 md:grid-cols-6 gap-6">
-            <div className="flex flex-col">
-              <label className="text-sm font-medium mb-2 text-gray-700">Name</label>
-              <input
-                type="text"
-                placeholder="e.g. Priya"
-                className="px-4 py-2.5 border border-gray-300 rounded-lg shadow-sm text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-              />
-            </div>
-
-            <div className="flex flex-col relative">
-              <label className="text-sm font-medium mb-2 text-gray-700">Company</label>
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="e.g. Google"
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg shadow-sm text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200"
-                  value={company}
-                  onChange={(e) => setCompany(e.target.value)}
-                />
-                {company.length > 2 && (
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => {
-                      const linkedInJobsUrl = `https://www.linkedin.com/jobs/search/?keywords=${encodeURIComponent(company)}`;
-                      window.open(linkedInJobsUrl, '_blank');
-                      showNotification('✨ Opening LinkedIn Jobs in a new tab');
-                    }}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1 bg-blue-100 text-blue-700 rounded-md text-sm font-medium hover:bg-blue-200 transition-colors"
-                  >
-                    View Jobs →
-                  </motion.button>
-                )}
-              </div>
-            </div>
-
-            <div className="flex flex-col">
-              <label className="text-sm font-medium mb-2 text-gray-700">Stage</label>
-              <select
-                className="px-4 py-2.5 border border-gray-300 rounded-lg shadow-sm text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200"
-                value={stage}
-                onChange={(e) => setStage(e.target.value)}
-              >
-                {STAGES.map((s) => (
-                  <option key={s} value={s}>{s}</option>
-                ))}
-              </select>
-            </div>
-
-            <div className="flex flex-col">
-              <label className="text-sm font-medium mb-2 text-gray-700">Referral Status</label>
-              <select
-                className="px-4 py-2.5 border border-gray-300 rounded-lg shadow-sm text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200"
-                value={referralStatus}
-                onChange={(e) => setReferralStatus(e.target.value)}
-              >
-                {REFERRAL_STATUSES.map((s) => (
-                  <option key={s} value={s}>{s}</option>
-                ))}
-              </select>
-            </div>
-
-            <div className="flex flex-col md:col-span-2">
-              <label className="text-sm font-medium mb-2 text-gray-700">Contact Details</label>
-              <input
-                type="text"
-                placeholder="e.g. email@example.com, +1234567890"
-                className="px-4 py-2.5 border border-gray-300 rounded-lg shadow-sm text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200"
-                value={contactDetails}
-                onChange={(e) => setContactDetails(e.target.value)}
-              />
-            </div>
-
-            <div className="flex flex-col md:col-span-6">
-              <label className="text-sm font-medium mb-2 text-gray-700">Tags</label>
-              <div className="flex flex-wrap gap-2">
-                {TAGS.map((tag) => (
-                  <button
-                    key={tag}
-                    onClick={() => toggleTag(tag)}
-                    className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors duration-200 ${
-                      selectedTags.includes(tag)
-                        ? 'bg-blue-100 text-blue-800 border border-blue-200 hover:bg-blue-200'
-                        : 'bg-gray-100 text-gray-800 border border-gray-200 hover:bg-gray-200'
-                    }`}
-                  >
-                    {tag}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="flex items-end md:col-span-6">
-              <button
-                onClick={addOrUpdateContact}
-                className={`w-full ${
-                  editIndex !== null 
-                    ? 'bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600' 
-                    : 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700'
-                } text-white py-2.5 rounded-lg transition-all duration-200 text-sm font-semibold shadow-md hover:shadow-lg transform hover:-translate-y-0.5`}
-              >
-                {editIndex !== null ? '💾 Save Changes' : '➕ Add Contact'}
-              </button>
-            </div>
-          </div>
-
-          {/* Referral Message Template Toggle */}
-          <div className="mt-6 border-t pt-6">
-            <button
-              onClick={() => setShowReferralTemplate(!showReferralTemplate)}
-              className="text-blue-600 hover:text-blue-700 font-medium text-sm flex items-center gap-2"
-            >
-              {showReferralTemplate ? '📝 Hide Referral Template' : '📝 Show Referral Template'}
-            </button>
-            
-            {showReferralTemplate && (
-              <div className="mt-4">
-                <label className="text-sm font-medium mb-2 text-gray-700 block">
-                  Referral Message Template
-                </label>
-                <textarea
-                  value={referralMessage}
-                  onChange={(e) => setReferralMessage(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200 min-h-[200px] font-mono"
-                  placeholder="Enter your referral message template..."
-                />
-              </div>
-            )}
-          </div>
+          <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600">
+            ReferralFlow
+          </h1>
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setShowAddForm(true)}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition-colors flex items-center gap-2"
+          >
+            <span className="text-lg">+</span> Add Contact
+          </motion.button>
         </motion.div>
 
-        {/* Contact List Table with animation */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-lg"
-        >
-          <motion.h2
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3 }}
-            className="text-2xl font-bold text-center py-5 bg-gradient-to-r from-blue-50 to-blue-100 text-blue-900 border-b border-gray-200"
-          >
-            Contact List
-          </motion.h2>
+        {/* Add/Edit Form Modal */}
+        <AnimatePresence>
+          {showAddForm && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+            >
+              <motion.div
+                initial={{ y: 50 }}
+                animate={{ y: 0 }}
+                className="bg-white rounded-xl shadow-xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+              >
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-2xl font-bold text-gray-800">
+                    {editIndex !== null ? 'Edit Contact' : 'Add New Contact'}
+                  </h2>
+                  <button
+                    onClick={resetForm}
+                    className="text-gray-500 hover:text-gray-700"
+                  >
+                    ✕
+                  </button>
+                </div>
 
-          {/* Filters Section with animation */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Name & Company */}
+                  <div className="space-y-4">
+                    <div>
+                      <label className="text-sm font-medium text-gray-700">Name</label>
+                      <input
+                        type="text"
+                        placeholder="e.g. Priya"
+                        className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-700">Company</label>
+                      <div className="relative">
+                        <input
+                          type="text"
+                          placeholder="e.g. Google"
+                          className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                          value={company}
+                          onChange={(e) => setCompany(e.target.value)}
+                        />
+                        {company.length > 2 && (
+                          <button
+                            onClick={() => {
+                              const linkedInJobsUrl = `https://www.linkedin.com/jobs/search/?keywords=${encodeURIComponent(company)}`;
+                              window.open(linkedInJobsUrl, '_blank');
+                              showNotification('✨ Opening LinkedIn Jobs in a new tab');
+                            }}
+                            className="absolute right-2 top-1/2 -translate-y-1/2 text-blue-600 hover:text-blue-700 text-sm"
+                          >
+                            View Jobs →
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Stage & Status */}
+                  <div className="space-y-4">
+                    <div>
+                      <label className="text-sm font-medium text-gray-700">Stage</label>
+                      <select
+                        className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                        value={stage}
+                        onChange={(e) => setStage(e.target.value)}
+                      >
+                        {STAGES.map((s) => (
+                          <option key={s} value={s}>{s}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-700">Referral Status</label>
+                      <select
+                        className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                        value={referralStatus}
+                        onChange={(e) => setReferralStatus(e.target.value)}
+                      >
+                        {REFERRAL_STATUSES.map((s) => (
+                          <option key={s} value={s}>{s}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Contact Details */}
+                  <div className="md:col-span-2">
+                    <label className="text-sm font-medium text-gray-700">Contact Details</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. email@example.com, +1234567890"
+                      className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                      value={contactDetails}
+                      onChange={(e) => setContactDetails(e.target.value)}
+                    />
+                  </div>
+
+                  {/* Tags */}
+                  <div className="md:col-span-2">
+                    <label className="text-sm font-medium text-gray-700">Tags</label>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {TAGS.map((tag) => (
+                        <button
+                          key={tag}
+                          onClick={() => toggleTag(tag)}
+                          className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
+                            selectedTags.includes(tag)
+                              ? 'bg-blue-100 text-blue-800 border border-blue-200'
+                              : 'bg-gray-100 text-gray-800 border border-gray-200'
+                          }`}
+                        >
+                          {tag}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Referral Message */}
+                  <div className="md:col-span-2">
+                    <button
+                      onClick={() => setShowReferralTemplate(!showReferralTemplate)}
+                      className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+                    >
+                      {showReferralTemplate ? '📝 Hide Template' : '📝 Show Template'}
+                    </button>
+                    
+                    <AnimatePresence>
+                      {showReferralTemplate && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: 'auto' }}
+                          exit={{ opacity: 0, height: 0 }}
+                          className="mt-2"
+                        >
+                          <textarea
+                            value={referralMessage}
+                            onChange={(e) => setReferralMessage(e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm font-mono min-h-[200px]"
+                            placeholder="Enter your referral message template..."
+                          />
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                </div>
+
+                <div className="mt-6 flex justify-end gap-3">
+                  <button
+                    onClick={resetForm}
+                    className="px-4 py-2 text-gray-700 hover:text-gray-900"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={addOrUpdateContact}
+                    className={`px-4 py-2 rounded-lg text-white ${
+                      editIndex !== null
+                        ? 'bg-yellow-500 hover:bg-yellow-600'
+                        : 'bg-blue-600 hover:bg-blue-700'
+                    }`}
+                  >
+                    {editIndex !== null ? '💾 Save Changes' : '➕ Add Contact'}
+                  </button>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Contacts List */}
+        <div className="space-y-4">
+          {/* Filters */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.4 }}
-            className="p-4 border-b border-gray-200 bg-gray-50"
+            className="bg-white rounded-xl shadow-md overflow-hidden"
           >
-            <div className="text-sm font-medium text-gray-700 mb-2">Filters</div>
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-              <input
-                type="text"
-                placeholder="Filter by name..."
-                className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                value={nameFilter}
-                onChange={(e) => setNameFilter(e.target.value)}
-              />
-              <input
-                type="text"
-                placeholder="Filter by company..."
-                className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                value={companyFilter}
-                onChange={(e) => setCompanyFilter(e.target.value)}
-              />
-              <select
-                className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                value={stageFilter}
-                onChange={(e) => setStageFilter(e.target.value)}
+            <div className="p-4">
+              <button
+                onClick={() => setShowFilters(!showFilters)}
+                className="flex items-center gap-2 text-gray-700 hover:text-gray-900"
               >
-                <option value="">All Stages</option>
-                {STAGES.map((s) => (
-                  <option key={s} value={s}>{s}</option>
-                ))}
-              </select>
-              <select
-                className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-              >
-                <option value="">All Statuses</option>
-                {REFERRAL_STATUSES.map((s) => (
-                  <option key={s} value={s}>{s}</option>
-                ))}
-              </select>
-              <select
-                className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                value={tagFilter}
-                onChange={(e) => setTagFilter(e.target.value)}
-              >
-                <option value="">All Tags</option>
-                {TAGS.map((t) => (
-                  <option key={t} value={t}>{t}</option>
-                ))}
-              </select>
+                <span className="text-lg">{showFilters ? '−' : '+'}</span>
+                <span className="font-medium">Filters</span>
+              </button>
+              
+              <AnimatePresence>
+                {showFilters && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="mt-4 grid grid-cols-1 md:grid-cols-5 gap-4"
+                  >
+                    <input
+                      type="text"
+                      placeholder="Filter by name..."
+                      className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                      value={nameFilter}
+                      onChange={(e) => setNameFilter(e.target.value)}
+                    />
+                    <input
+                      type="text"
+                      placeholder="Filter by company..."
+                      className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                      value={companyFilter}
+                      onChange={(e) => setCompanyFilter(e.target.value)}
+                    />
+                    <select
+                      className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                      value={stageFilter}
+                      onChange={(e) => setStageFilter(e.target.value)}
+                    >
+                      <option value="">All Stages</option>
+                      {STAGES.map((s) => (
+                        <option key={s} value={s}>{s}</option>
+                      ))}
+                    </select>
+                    <select
+                      className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                      value={statusFilter}
+                      onChange={(e) => setStatusFilter(e.target.value)}
+                    >
+                      <option value="">All Statuses</option>
+                      {REFERRAL_STATUSES.map((s) => (
+                        <option key={s} value={s}>{s}</option>
+                      ))}
+                    </select>
+                    <select
+                      className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                      value={tagFilter}
+                      onChange={(e) => setTagFilter(e.target.value)}
+                    >
+                      <option value="">All Tags</option>
+                      {TAGS.map((t) => (
+                        <option key={t} value={t}>{t}</option>
+                      ))}
+                    </select>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           </motion.div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse">
-              <thead>
-                <tr className="bg-gray-50">
-                  <th className="border-b border-gray-200 px-6 py-3 text-left text-sm font-semibold text-gray-700">Name</th>
-                  <th className="border-b border-gray-200 px-6 py-3 text-left text-sm font-semibold text-gray-700">Company</th>
-                  <th className="border-b border-gray-200 px-6 py-3 text-left text-sm font-semibold text-gray-700">Stage</th>
-                  <th className="border-b border-gray-200 px-6 py-3 text-left text-sm font-semibold text-gray-700">Referral Status</th>
-                  <th className="border-b border-gray-200 px-6 py-3 text-left text-sm font-semibold text-gray-700">Contact Details</th>
-                  <th className="border-b border-gray-200 px-6 py-3 text-left text-sm font-semibold text-gray-700">Tags</th>
-                  <th className="border-b border-gray-200 px-6 py-3 text-center text-sm font-semibold text-gray-700">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                <AnimatePresence>
-                  {filteredContacts.length === 0 ? (
-                    <motion.tr
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                    >
-                      <td colSpan={7} className="text-center py-8 text-gray-400 border-b border-gray-100">
-                        {contacts.length === 0 ? 'No contacts added yet' : 'No contacts match the current filters'}
-                      </td>
-                    </motion.tr>
-                  ) : (
-                    filteredContacts.map((contact, index) => (
-                      <motion.tr
-                        key={index}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -20 }}
-                        transition={{ delay: index * 0.05 }}
-                        className="hover:bg-gray-50 transition-colors duration-150"
-                      >
-                        <td className="border-b border-gray-100 px-6 py-4 text-gray-800">{contact.name}</td>
-                        <td className="border-b border-gray-100 px-6 py-4 text-gray-800">{contact.company}</td>
-                        <td className="border-b border-gray-100 px-6 py-4">
-                          <motion.span
-                            whileHover={{ scale: 1.05 }}
-                            className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${getStageColor(contact.stage)}`}
-                          >
+          {/* Contact Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <AnimatePresence>
+              {filteredContacts.length === 0 ? (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="md:col-span-2 lg:col-span-3 text-center py-8 text-gray-400"
+                >
+                  {contacts.length === 0 ? 'No contacts added yet' : 'No contacts match the current filters'}
+                </motion.div>
+              ) : (
+                filteredContacts.map((contact, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ delay: index * 0.05 }}
+                    className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow"
+                  >
+                    <div className="p-4">
+                      <div className="flex justify-between items-start mb-3">
+                        <div>
+                          <h3 className="font-medium text-gray-900">{contact.name}</h3>
+                          <p className="text-sm text-gray-600">{contact.company}</p>
+                        </div>
+                        <button
+                          onClick={() => startEdit(index)}
+                          className="text-yellow-600 hover:text-yellow-700"
+                        >
+                          ✏️
+                        </button>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <div className="flex gap-2">
+                          <span className={`px-2 py-1 rounded-md text-xs font-medium ${getStageColor(contact.stage)}`}>
                             {contact.stage}
-                          </motion.span>
-                        </td>
-                        <td className="border-b border-gray-100 px-6 py-4">
-                          <motion.span
-                            whileHover={{ scale: 1.05 }}
-                            className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${getReferralStatusColor(contact.referralStatus)}`}
-                          >
+                          </span>
+                          <span className={`px-2 py-1 rounded-md text-xs font-medium ${getReferralStatusColor(contact.referralStatus)}`}>
                             {contact.referralStatus}
-                          </motion.span>
-                        </td>
-                        <td className="border-b border-gray-100 px-6 py-4 text-gray-800">
-                          {contact.contactDetails || '-'}
-                        </td>
-                        <td className="border-b border-gray-100 px-6 py-4">
+                          </span>
+                        </div>
+                        
+                        {contact.contactDetails && (
+                          <p className="text-sm text-gray-600">
+                            📧 {contact.contactDetails}
+                          </p>
+                        )}
+                        
+                        {contact.tags.length > 0 && (
                           <div className="flex flex-wrap gap-1">
                             {contact.tags.map((tag, tagIndex) => (
-                              <motion.span
+                              <span
                                 key={tagIndex}
-                                whileHover={{ scale: 1.05 }}
-                                className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800 border border-purple-200"
+                                className="px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800"
                               >
                                 {tag}
-                              </motion.span>
+                              </span>
                             ))}
-                            {contact.tags.length === 0 && '-'}
                           </div>
-                        </td>
-                        <td className="border-b border-gray-100 px-6 py-4 text-center">
-                          <div className="flex items-center justify-center">
-                            <motion.button
-                              whileHover={{ scale: 1.05 }}
-                              whileTap={{ scale: 0.95 }}
-                              onClick={() => startEdit(index)}
-                              className="inline-flex items-center px-3 py-1 rounded-md text-sm font-medium text-yellow-700 bg-yellow-50 hover:bg-yellow-100 transition-colors duration-150"
-                            >
-                              ✏️ Edit
-                            </motion.button>
-                          </div>
-                        </td>
-                      </motion.tr>
-                    ))
-                  )}
-                </AnimatePresence>
-              </tbody>
-            </table>
+                        )}
+                      </div>
+                    </div>
+                  </motion.div>
+                ))
+              )}
+            </AnimatePresence>
           </div>
-        </motion.div>
+        </div>
       </div>
     </div>
   );
