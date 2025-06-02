@@ -167,3 +167,12 @@ git clone https://github.com/your-username/referralflow.git
 cd referralflow
 npm install
 npm run dev
+
+✅
+
+👩‍💻 About the Creator
+Aditi Sahu
+M.S. in Engineering Management – San Jose State University
+Focused on product systems, user empathy, and frontend design
+LinkedIn • GitHub
+
