@@ -51,6 +51,26 @@ const getReferralStatusColor = (status: string) => {
   }
 };
 
+// Add tag category colors
+const getTagColor = (tag: string) => {
+  switch (tag) {
+    case 'SJSU Alum':
+      return 'bg-neutral-900 text-white';
+    case 'Hiring Manager':
+      return 'bg-neutral-800 text-white';
+    case 'Fast Responder':
+      return 'bg-neutral-700 text-white';
+    case 'High Priority':
+      return 'bg-neutral-200 text-neutral-900 border border-neutral-400';
+    case 'Tech Lead':
+      return 'bg-neutral-300 text-neutral-900';
+    case 'Referred Before':
+      return 'bg-neutral-100 text-neutral-900 border border-neutral-300';
+    default:
+      return 'bg-neutral-100 text-neutral-800';
+  }
+};
+
 function App() {
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [showAddForm, setShowAddForm] = useState(false);
@@ -463,76 +483,96 @@ function App() {
             </div>
           </motion.div>
 
-          {/* Contact Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <AnimatePresence>
-              {filteredContacts.length === 0 ? (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="md:col-span-2 lg:col-span-3 text-center py-8 text-neutral-400"
-                >
-                  {contacts.length === 0 ? 'No contacts added yet' : 'No contacts match the current filters'}
-                </motion.div>
-              ) : (
-                filteredContacts.map((contact, index) => (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    transition={{ delay: index * 0.05 }}
-                    className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow border border-neutral-200"
-                  >
-                    <div className="p-4">
-                      <div className="flex justify-between items-start mb-3">
-                        <div>
-                          <h3 className="font-medium text-neutral-900">{contact.name}</h3>
-                          <p className="text-sm text-neutral-600">{contact.company}</p>
-                        </div>
-                        <button
-                          onClick={() => startEdit(index)}
-                          className="text-neutral-400 hover:text-neutral-600"
-                        >
-                          ✏️
-                        </button>
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <div className="flex gap-2">
-                          <span className={`px-2 py-1 rounded-md text-xs font-medium ${getStageColor(contact.stage)}`}>
-                            {contact.stage}
-                          </span>
-                          <span className={`px-2 py-1 rounded-md text-xs font-medium ${getReferralStatusColor(contact.referralStatus)}`}>
-                            {contact.referralStatus}
-                          </span>
-                        </div>
-                        
-                        {contact.contactDetails && (
-                          <p className="text-sm text-neutral-600">
-                            📧 {contact.contactDetails}
-                          </p>
-                        )}
-                        
-                        {contact.tags.length > 0 && (
+          {/* Contact Table */}
+          <div className="bg-white rounded-xl shadow-md overflow-hidden border border-neutral-200">
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-neutral-200">
+                <thead className="bg-neutral-50">
+                  <tr>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
+                      Contact
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
+                      Status
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
+                      Contact Details
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">
+                      Tags
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-neutral-500 uppercase tracking-wider">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-neutral-200">
+                  {filteredContacts.length === 0 ? (
+                    <tr>
+                      <td colSpan={5} className="px-6 py-8 text-center text-neutral-400">
+                        {contacts.length === 0 ? 'No contacts added yet' : 'No contacts match the current filters'}
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredContacts.map((contact, index) => (
+                      <motion.tr
+                        key={index}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: index * 0.05 }}
+                        className="hover:bg-neutral-50"
+                      >
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex flex-col">
+                            <div className="text-sm font-medium text-neutral-900">{contact.name}</div>
+                            <div className="text-sm text-neutral-500">{contact.company}</div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex flex-col gap-1">
+                            <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-md ${getStageColor(contact.stage)}`}>
+                              {contact.stage}
+                            </span>
+                            <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-md ${getReferralStatusColor(contact.referralStatus)}`}>
+                              {contact.referralStatus}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-neutral-600">
+                            {contact.contactDetails ? (
+                              <span>📧 {contact.contactDetails}</span>
+                            ) : (
+                              <span className="text-neutral-400">No contact details</span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
                           <div className="flex flex-wrap gap-1">
                             {contact.tags.map((tag, tagIndex) => (
                               <span
                                 key={tagIndex}
-                                className="px-2 py-0.5 rounded-full text-xs font-medium bg-neutral-100 text-neutral-800"
+                                className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${getTagColor(tag)}`}
                               >
                                 {tag}
                               </span>
                             ))}
                           </div>
-                        )}
-                      </div>
-                    </div>
-                  </motion.div>
-                ))
-              )}
-            </AnimatePresence>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-right">
+                          <button
+                            onClick={() => startEdit(index)}
+                            className="text-neutral-400 hover:text-neutral-600 transition-colors"
+                          >
+                            ✏️
+                          </button>
+                        </td>
+                      </motion.tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>
