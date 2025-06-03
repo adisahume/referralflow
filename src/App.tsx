@@ -1,8 +1,22 @@
+/**
+ * ReferralFlow - A secure LinkedIn connections tracker for managing referrals
+ * 
+ * This application helps users manage their professional network contacts,
+ * track referral requests, and maintain encrypted contact information.
+ * Built with React, TypeScript, and TailwindCSS.
+ */
+
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import './index.css';
+import CryptoJS from 'crypto-js';
 
-type Contact = {
+// Security configuration
+// TODO: In production, this should be stored in environment variables
+const ENCRYPTION_KEY = 'your-secure-key-2024';
+
+// Type definitions
+interface Contact {
   name: string;
   company: string;
   stage: string;
@@ -10,12 +24,14 @@ type Contact = {
   contactDetails: string;
   referralMessage: string;
   tags: string[];
-};
+}
 
+// Application constants
 const STAGES = ['Connection Sent', 'Accepted', 'Referral Asked'];
 const REFERRAL_STATUSES = ['Pending', 'Will Refer', 'Won\'t Refer'];
 const TAGS = ['SJSU Alum', 'Hiring Manager', 'Fast Responder', 'High Priority', 'Tech Lead', 'Referred Before'];
 
+// Default template for referral messages
 const DEFAULT_REFERRAL_MESSAGE = `Hi [Hiring Manager],
 
 I'd like to refer [Name] for [Position] at [Company]. They have demonstrated strong skills in [Skills] and I believe they would be a great addition to the team.
@@ -27,7 +43,12 @@ You can reach them at [Contact Details].
 Best regards,
 [Your Name]`;
 
-const getStageColor = (stage: string) => {
+/**
+ * Utility function to get the appropriate color class for a stage
+ * @param stage - The current stage of the referral process
+ * @returns Tailwind CSS classes for styling
+ */
+const getStageColor = (stage: string): string => {
   switch (stage) {
     case 'Connection Sent':
       return 'bg-neutral-100 text-neutral-800 border-neutral-200';
@@ -40,7 +61,12 @@ const getStageColor = (stage: string) => {
   }
 };
 
-const getReferralStatusColor = (status: string) => {
+/**
+ * Utility function to get the appropriate color class for a referral status
+ * @param status - The current referral status
+ * @returns Tailwind CSS classes for styling
+ */
+const getReferralStatusColor = (status: string): string => {
   switch (status) {
     case 'Will Refer':
       return 'bg-neutral-200 text-neutral-900 border-neutral-300';
@@ -51,8 +77,12 @@ const getReferralStatusColor = (status: string) => {
   }
 };
 
-// Add tag category colors
-const getTagColor = (tag: string) => {
+/**
+ * Utility function to get the appropriate color class for a tag
+ * @param tag - The tag name
+ * @returns Tailwind CSS classes for styling
+ */
+const getTagColor = (tag: string): string => {
   switch (tag) {
     case 'SJSU Alum':
       return 'bg-neutral-900 text-white';
@@ -71,25 +101,32 @@ const getTagColor = (tag: string) => {
   }
 };
 
+/**
+ * Encryption utilities for secure data storage
+ */
+const encryptData = (data: any): string => {
+  return CryptoJS.AES.encrypt(JSON.stringify(data), ENCRYPTION_KEY).toString();
+};
+
+const decryptData = (encryptedData: string): any => {
+  try {
+    const bytes = CryptoJS.AES.decrypt(encryptedData, ENCRYPTION_KEY);
+    return JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
+  } catch (error) {
+    console.error('Error decrypting data:', error);
+    return null;
+  }
+};
+
+/**
+ * Main Application Component
+ */
 function App() {
+  // State management
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [showAddForm, setShowAddForm] = useState(false);
   
-  // Load from localStorage on initial mount
-  useEffect(() => {
-    const storedContacts = localStorage.getItem('referralflow-contacts');
-    if (storedContacts) {
-      setContacts(JSON.parse(storedContacts));
-    }
-  }, []);
-
-  // Save to localStorage every time contacts change
-  useEffect(() => {
-    if (contacts.length > 0) {
-      localStorage.setItem('referralflow-contacts', JSON.stringify(contacts));
-    }
-  }, [contacts]);
-
+  // Form state
   const [name, setName] = useState('');
   const [company, setCompany] = useState('');
   const [stage, setStage] = useState(STAGES[0]);
@@ -101,7 +138,7 @@ function App() {
   const [showReferralTemplate, setShowReferralTemplate] = useState(false);
   const [notification, setNotification] = useState<string | null>(null);
   
-  // Filter states
+  // Filter state
   const [nameFilter, setNameFilter] = useState('');
   const [companyFilter, setCompanyFilter] = useState('');
   const [stageFilter, setStageFilter] = useState<string>('');
@@ -109,11 +146,38 @@ function App() {
   const [tagFilter, setTagFilter] = useState<string>('');
   const [showFilters, setShowFilters] = useState(false);
 
-  const showNotification = (message: string, duration = 3000) => {
+  // Load encrypted data from localStorage on initial mount
+  useEffect(() => {
+    const storedData = localStorage.getItem('referralflow-contacts');
+    if (storedData) {
+      const decryptedContacts = decryptData(storedData);
+      if (decryptedContacts) {
+        setContacts(decryptedContacts);
+      }
+    }
+  }, []);
+
+  // Save encrypted data to localStorage when contacts change
+  useEffect(() => {
+    if (contacts.length > 0) {
+      const encryptedData = encryptData(contacts);
+      localStorage.setItem('referralflow-contacts', encryptedData);
+    }
+  }, [contacts]);
+
+  /**
+   * Display a temporary notification message
+   * @param message - The message to display
+   * @param duration - How long to show the message (in ms)
+   */
+  const showNotification = (message: string, duration = 3000): void => {
     setNotification(message);
     setTimeout(() => setNotification(null), duration);
   };
 
+  /**
+   * Filter contacts based on current filter criteria
+   */
   const filteredContacts = contacts.filter(contact => {
     const nameMatch = contact.name.toLowerCase().includes(nameFilter.toLowerCase());
     const companyMatch = contact.company.toLowerCase().includes(companyFilter.toLowerCase());
@@ -124,7 +188,10 @@ function App() {
     return nameMatch && companyMatch && stageMatch && statusMatch && tagMatch;
   });
 
-  const resetForm = () => {
+  /**
+   * Reset form state to default values
+   */
+  const resetForm = (): void => {
     setName('');
     setCompany('');
     setStage(STAGES[0]);
@@ -136,58 +203,60 @@ function App() {
     setShowAddForm(false);
   };
 
-  const addOrUpdateContact = () => {
+  /**
+   * Add a new contact or update an existing one
+   */
+  const addOrUpdateContact = (): void => {
     if (!name || !company) {
       showNotification('❌ Please enter both name and company.');
       return;
     }
 
+    const contactData = {
+      name,
+      company,
+      stage,
+      referralStatus,
+      contactDetails,
+      referralMessage,
+      tags: selectedTags,
+    };
+
     if (editIndex !== null) {
       const updated = [...contacts];
-      updated[editIndex] = {
-        name,
-        company,
-        stage,
-        referralStatus,
-        contactDetails,
-        referralMessage,
-        tags: selectedTags,
-      };
+      updated[editIndex] = contactData;
       setContacts(updated);
       showNotification('✅ Contact updated successfully.');
     } else {
-      setContacts([
-        ...contacts,
-        {
-          name,
-          company,
-          stage,
-          referralStatus,
-          contactDetails,
-          referralMessage,
-          tags: selectedTags,
-        },
-      ]);
+      setContacts([...contacts, contactData]);
       showNotification('✅ Contact added successfully.');
     }
 
     resetForm();
   };
 
-  const startEdit = (index: number) => {
-    const c = contacts[index];
-    setName(c.name);
-    setCompany(c.company);
-    setStage(c.stage);
-    setReferralStatus(c.referralStatus);
-    setContactDetails(c.contactDetails);
-    setReferralMessage(c.referralMessage);
-    setSelectedTags(c.tags);
+  /**
+   * Start editing an existing contact
+   * @param index - The index of the contact to edit
+   */
+  const startEdit = (index: number): void => {
+    const contact = contacts[index];
+    setName(contact.name);
+    setCompany(contact.company);
+    setStage(contact.stage);
+    setReferralStatus(contact.referralStatus);
+    setContactDetails(contact.contactDetails);
+    setReferralMessage(contact.referralMessage);
+    setSelectedTags(contact.tags);
     setEditIndex(index);
     setShowAddForm(true);
   };
 
-  const toggleTag = (tag: string) => {
+  /**
+   * Toggle a tag selection
+   * @param tag - The tag to toggle
+   */
+  const toggleTag = (tag: string): void => {
     setSelectedTags(prev => 
       prev.includes(tag) 
         ? prev.filter(t => t !== tag)
@@ -195,10 +264,29 @@ function App() {
     );
   };
 
+  /**
+   * Delete a contact
+   * @param index - The index of the contact to delete
+   */
+  const deleteContact = (index: number): void => {
+    const updatedContacts = [...contacts];
+    updatedContacts.splice(index, 1);
+    setContacts(updatedContacts);
+    showNotification('🗑️ Contact deleted successfully');
+  };
+
   return (
     <div className="min-h-screen bg-white px-4 py-6 text-neutral-900">
       <div className="max-w-7xl mx-auto">
-        {/* Notification */}
+        {/* App Header with Description */}
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold mb-2">ReferralFlow</h1>
+          <p className="text-neutral-600 max-w-2xl mx-auto">
+            Your LinkedIn connections tracker for managing referrals. Keep track of your professional network and manage referral requests efficiently.
+          </p>
+        </div>
+
+        {/* Notification System */}
         <AnimatePresence>
           {notification && (
             <motion.div
@@ -212,7 +300,7 @@ function App() {
           )}
         </AnimatePresence>
 
-        {/* Header */}
+        {/* Main Header with Add Contact Button */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -231,7 +319,7 @@ function App() {
           </motion.button>
         </motion.div>
 
-        {/* Add/Edit Form Modal */}
+        {/* Add/Edit Contact Modal */}
         <AnimatePresence>
           {showAddForm && (
             <motion.div
@@ -240,11 +328,13 @@ function App() {
               exit={{ opacity: 0, scale: 0.95 }}
               className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
             >
+              {/* Modal Content */}
               <motion.div
                 initial={{ y: 50 }}
                 animate={{ y: 0 }}
                 className="bg-white rounded-xl shadow-xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-neutral-200"
               >
+                {/* Modal Header */}
                 <div className="flex justify-between items-center mb-6">
                   <h2 className="text-2xl font-bold text-neutral-900">
                     {editIndex !== null ? 'Edit Contact' : 'Add New Contact'}
@@ -257,8 +347,9 @@ function App() {
                   </button>
                 </div>
 
+                {/* Contact Form */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Name & Company */}
+                  {/* Name & Company Section */}
                   <div className="space-y-4">
                     <div>
                       <label className="text-sm font-medium text-neutral-700">Name</label>
@@ -280,6 +371,7 @@ function App() {
                           value={company}
                           onChange={(e) => setCompany(e.target.value)}
                         />
+                        {/* LinkedIn Jobs Integration */}
                         {company.length > 2 && (
                           <button
                             onClick={() => {
@@ -296,7 +388,7 @@ function App() {
                     </div>
                   </div>
 
-                  {/* Stage & Status */}
+                  {/* Stage & Status Section */}
                   <div className="space-y-4">
                     <div>
                       <label className="text-sm font-medium text-neutral-700">Stage</label>
@@ -324,7 +416,7 @@ function App() {
                     </div>
                   </div>
 
-                  {/* Contact Details */}
+                  {/* Contact Details Section */}
                   <div className="md:col-span-2">
                     <label className="text-sm font-medium text-neutral-700">Contact Details</label>
                     <input
@@ -336,7 +428,7 @@ function App() {
                     />
                   </div>
 
-                  {/* Tags */}
+                  {/* Tags Section */}
                   <div className="md:col-span-2">
                     <label className="text-sm font-medium text-neutral-700">Tags</label>
                     <div className="mt-2 flex flex-wrap gap-2">
@@ -356,7 +448,7 @@ function App() {
                     </div>
                   </div>
 
-                  {/* Referral Message */}
+                  {/* Referral Message Template Section */}
                   <div className="md:col-span-2">
                     <button
                       onClick={() => setShowReferralTemplate(!showReferralTemplate)}
@@ -385,6 +477,7 @@ function App() {
                   </div>
                 </div>
 
+                {/* Form Actions */}
                 <div className="mt-6 flex justify-end gap-3">
                   <button
                     onClick={resetForm}
@@ -408,9 +501,9 @@ function App() {
           )}
         </AnimatePresence>
 
-        {/* Contacts List */}
+        {/* Contacts List Section */}
         <div className="space-y-4">
-          {/* Filters */}
+          {/* Filters Panel */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -425,6 +518,7 @@ function App() {
                 <span className="font-medium">Filters</span>
               </button>
               
+              {/* Expandable Filters */}
               <AnimatePresence>
                 {showFilters && (
                   <motion.div
@@ -483,7 +577,7 @@ function App() {
             </div>
           </motion.div>
 
-          {/* Contact Table */}
+          {/* Contacts Table */}
           <div className="bg-white rounded-xl shadow-md overflow-hidden border border-neutral-200">
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-neutral-200">
@@ -560,12 +654,26 @@ function App() {
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right">
-                          <button
-                            onClick={() => startEdit(index)}
-                            className="text-neutral-400 hover:text-neutral-600 transition-colors"
-                          >
-                            ✏️
-                          </button>
+                          <div className="flex justify-end items-center gap-2">
+                            <button
+                              onClick={() => startEdit(index)}
+                              className="text-neutral-400 hover:text-neutral-600 transition-colors"
+                              title="Edit contact"
+                            >
+                              ✏️
+                            </button>
+                            <button
+                              onClick={() => {
+                                if (window.confirm('Are you sure you want to delete this contact?')) {
+                                  deleteContact(index);
+                                }
+                              }}
+                              className="text-neutral-400 hover:text-red-600 transition-colors"
+                              title="Delete contact"
+                            >
+                              🗑️
+                            </button>
+                          </div>
                         </td>
                       </motion.tr>
                     ))
