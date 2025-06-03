@@ -108,6 +108,21 @@ ReferralFlow is built for clarity and next steps.
 
 ---
 
+✅ Why ReferralFlow Works
+ReferralFlow isn’t just a tracker — it’s a tool that drives action and mirrors how job seekers really manage outreach.
+
+💡 Interactive: Users move through stages, not just fill fields. Editing, filtering, and tagging are seamless.
+
+👀 Visual: Color-coded badges, tag chips, and filters make referral progress clear at a glance.
+
+🧠 Behavior-Aligned: Tracks exactly what users already do — message, follow up, tag contacts, and note outcomes.
+
+🎯 Action-Oriented: Guides users toward their next step (e.g., follow up), instead of passively storing info.
+
+🤝 Supportive: Notifications, animations, and localStorage make it feel responsive, intuitive, and forgiving.
+
+ReferralFlow helps users work through their referral strategy — not just record it.
+
 ## 🔭 Strategic Vision
 
 ### If ReferralFlow gained traction...
