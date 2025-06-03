@@ -30,24 +30,24 @@ Best regards,
 const getStageColor = (stage: string) => {
   switch (stage) {
     case 'Connection Sent':
-      return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      return 'bg-neutral-100 text-neutral-800 border-neutral-200';
     case 'Accepted':
-      return 'bg-green-100 text-green-800 border-green-200';
+      return 'bg-neutral-200 text-neutral-900 border-neutral-300';
     case 'Referral Asked':
-      return 'bg-blue-100 text-blue-800 border-blue-200';
+      return 'bg-neutral-300 text-neutral-900 border-neutral-400';
     default:
-      return 'bg-gray-100 text-gray-800 border-gray-200';
+      return 'bg-neutral-100 text-neutral-800 border-neutral-200';
   }
 };
 
 const getReferralStatusColor = (status: string) => {
   switch (status) {
     case 'Will Refer':
-      return 'bg-green-100 text-green-800 border-green-200';
+      return 'bg-neutral-200 text-neutral-900 border-neutral-300';
     case 'Won\'t Refer':
-      return 'bg-red-100 text-red-800 border-red-200';
+      return 'bg-neutral-900 text-white border-neutral-700';
     default:
-      return 'bg-gray-100 text-gray-800 border-gray-200';
+      return 'bg-neutral-100 text-neutral-800 border-neutral-200';
   }
 };
 
@@ -176,7 +176,7 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 px-4 py-6 text-gray-800">
+    <div className="min-h-screen bg-white px-4 py-6 text-neutral-900">
       <div className="max-w-7xl mx-auto">
         {/* Notification */}
         <AnimatePresence>
@@ -185,7 +185,7 @@ function App() {
               initial={{ opacity: 0, y: -50 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -50 }}
-              className="fixed top-5 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white text-sm font-medium px-6 py-3 rounded-lg shadow-lg z-50"
+              className="fixed top-5 left-1/2 transform -translate-x-1/2 bg-neutral-900 text-white text-sm font-medium px-6 py-3 rounded-lg shadow-lg z-50"
             >
               {notification}
             </motion.div>
@@ -198,14 +198,14 @@ function App() {
           animate={{ opacity: 1, y: 0 }}
           className="flex justify-between items-center mb-6"
         >
-          <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600">
+          <h1 className="text-3xl font-bold text-neutral-900">
             ReferralFlow
           </h1>
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => setShowAddForm(true)}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition-colors flex items-center gap-2"
+            className="px-4 py-2 bg-neutral-900 text-white rounded-lg shadow-md hover:bg-neutral-800 transition-colors flex items-center gap-2"
           >
             <span className="text-lg">+</span> Add Contact
           </motion.button>
@@ -223,15 +223,15 @@ function App() {
               <motion.div
                 initial={{ y: 50 }}
                 animate={{ y: 0 }}
-                className="bg-white rounded-xl shadow-xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+                className="bg-white rounded-xl shadow-xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-neutral-200"
               >
                 <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-2xl font-bold text-gray-800">
+                  <h2 className="text-2xl font-bold text-neutral-900">
                     {editIndex !== null ? 'Edit Contact' : 'Add New Contact'}
                   </h2>
                   <button
                     onClick={resetForm}
-                    className="text-gray-500 hover:text-gray-700"
+                    className="text-neutral-500 hover:text-neutral-700"
                   >
                     ✕
                   </button>
@@ -241,22 +241,22 @@ function App() {
                   {/* Name & Company */}
                   <div className="space-y-4">
                     <div>
-                      <label className="text-sm font-medium text-gray-700">Name</label>
+                      <label className="text-sm font-medium text-neutral-700">Name</label>
                       <input
                         type="text"
                         placeholder="e.g. Priya"
-                        className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                        className="mt-1 w-full px-3 py-2 border border-neutral-300 rounded-lg text-sm focus:ring-1 focus:ring-neutral-900 focus:border-neutral-900"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
                       />
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-gray-700">Company</label>
+                      <label className="text-sm font-medium text-neutral-700">Company</label>
                       <div className="relative">
                         <input
                           type="text"
                           placeholder="e.g. Google"
-                          className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                          className="mt-1 w-full px-3 py-2 border border-neutral-300 rounded-lg text-sm focus:ring-1 focus:ring-neutral-900 focus:border-neutral-900"
                           value={company}
                           onChange={(e) => setCompany(e.target.value)}
                         />
@@ -267,7 +267,7 @@ function App() {
                               window.open(linkedInJobsUrl, '_blank');
                               showNotification('✨ Opening LinkedIn Jobs in a new tab');
                             }}
-                            className="absolute right-2 top-1/2 -translate-y-1/2 text-blue-600 hover:text-blue-700 text-sm"
+                            className="absolute right-2 top-1/2 -translate-y-1/2 text-neutral-600 hover:text-neutral-900 text-sm"
                           >
                             View Jobs →
                           </button>
@@ -279,9 +279,9 @@ function App() {
                   {/* Stage & Status */}
                   <div className="space-y-4">
                     <div>
-                      <label className="text-sm font-medium text-gray-700">Stage</label>
+                      <label className="text-sm font-medium text-neutral-700">Stage</label>
                       <select
-                        className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                        className="mt-1 w-full px-3 py-2 border border-neutral-300 rounded-lg text-sm focus:ring-1 focus:ring-neutral-900 focus:border-neutral-900"
                         value={stage}
                         onChange={(e) => setStage(e.target.value)}
                       >
@@ -291,9 +291,9 @@ function App() {
                       </select>
                     </div>
                     <div>
-                      <label className="text-sm font-medium text-gray-700">Referral Status</label>
+                      <label className="text-sm font-medium text-neutral-700">Referral Status</label>
                       <select
-                        className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                        className="mt-1 w-full px-3 py-2 border border-neutral-300 rounded-lg text-sm focus:ring-1 focus:ring-neutral-900 focus:border-neutral-900"
                         value={referralStatus}
                         onChange={(e) => setReferralStatus(e.target.value)}
                       >
@@ -306,11 +306,11 @@ function App() {
 
                   {/* Contact Details */}
                   <div className="md:col-span-2">
-                    <label className="text-sm font-medium text-gray-700">Contact Details</label>
+                    <label className="text-sm font-medium text-neutral-700">Contact Details</label>
                     <input
                       type="text"
                       placeholder="e.g. email@example.com, +1234567890"
-                      className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                      className="mt-1 w-full px-3 py-2 border border-neutral-300 rounded-lg text-sm focus:ring-1 focus:ring-neutral-900 focus:border-neutral-900"
                       value={contactDetails}
                       onChange={(e) => setContactDetails(e.target.value)}
                     />
@@ -318,7 +318,7 @@ function App() {
 
                   {/* Tags */}
                   <div className="md:col-span-2">
-                    <label className="text-sm font-medium text-gray-700">Tags</label>
+                    <label className="text-sm font-medium text-neutral-700">Tags</label>
                     <div className="mt-2 flex flex-wrap gap-2">
                       {TAGS.map((tag) => (
                         <button
@@ -326,8 +326,8 @@ function App() {
                           onClick={() => toggleTag(tag)}
                           className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
                             selectedTags.includes(tag)
-                              ? 'bg-blue-100 text-blue-800 border border-blue-200'
-                              : 'bg-gray-100 text-gray-800 border border-gray-200'
+                              ? 'bg-neutral-900 text-white'
+                              : 'bg-neutral-100 text-neutral-800 hover:bg-neutral-200'
                           }`}
                         >
                           {tag}
@@ -340,7 +340,7 @@ function App() {
                   <div className="md:col-span-2">
                     <button
                       onClick={() => setShowReferralTemplate(!showReferralTemplate)}
-                      className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+                      className="text-neutral-600 hover:text-neutral-900 text-sm font-medium"
                     >
                       {showReferralTemplate ? '📝 Hide Template' : '📝 Show Template'}
                     </button>
@@ -356,7 +356,7 @@ function App() {
                           <textarea
                             value={referralMessage}
                             onChange={(e) => setReferralMessage(e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm font-mono min-h-[200px]"
+                            className="w-full px-3 py-2 border border-neutral-300 rounded-lg text-sm font-mono min-h-[200px] focus:ring-1 focus:ring-neutral-900 focus:border-neutral-900"
                             placeholder="Enter your referral message template..."
                           />
                         </motion.div>
@@ -368,7 +368,7 @@ function App() {
                 <div className="mt-6 flex justify-end gap-3">
                   <button
                     onClick={resetForm}
-                    className="px-4 py-2 text-gray-700 hover:text-gray-900"
+                    className="px-4 py-2 text-neutral-600 hover:text-neutral-900"
                   >
                     Cancel
                   </button>
@@ -376,8 +376,8 @@ function App() {
                     onClick={addOrUpdateContact}
                     className={`px-4 py-2 rounded-lg text-white ${
                       editIndex !== null
-                        ? 'bg-yellow-500 hover:bg-yellow-600'
-                        : 'bg-blue-600 hover:bg-blue-700'
+                        ? 'bg-neutral-700 hover:bg-neutral-800'
+                        : 'bg-neutral-900 hover:bg-neutral-800'
                     }`}
                   >
                     {editIndex !== null ? '💾 Save Changes' : '➕ Add Contact'}
@@ -394,12 +394,12 @@ function App() {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="bg-white rounded-xl shadow-md overflow-hidden"
+            className="bg-white rounded-xl shadow-md overflow-hidden border border-neutral-200"
           >
             <div className="p-4">
               <button
                 onClick={() => setShowFilters(!showFilters)}
-                className="flex items-center gap-2 text-gray-700 hover:text-gray-900"
+                className="flex items-center gap-2 text-neutral-700 hover:text-neutral-900"
               >
                 <span className="text-lg">{showFilters ? '−' : '+'}</span>
                 <span className="font-medium">Filters</span>
@@ -416,19 +416,19 @@ function App() {
                     <input
                       type="text"
                       placeholder="Filter by name..."
-                      className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                      className="px-3 py-2 border border-neutral-300 rounded-lg text-sm focus:ring-1 focus:ring-neutral-900 focus:border-neutral-900"
                       value={nameFilter}
                       onChange={(e) => setNameFilter(e.target.value)}
                     />
                     <input
                       type="text"
                       placeholder="Filter by company..."
-                      className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                      className="px-3 py-2 border border-neutral-300 rounded-lg text-sm focus:ring-1 focus:ring-neutral-900 focus:border-neutral-900"
                       value={companyFilter}
                       onChange={(e) => setCompanyFilter(e.target.value)}
                     />
                     <select
-                      className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                      className="px-3 py-2 border border-neutral-300 rounded-lg text-sm focus:ring-1 focus:ring-neutral-900 focus:border-neutral-900"
                       value={stageFilter}
                       onChange={(e) => setStageFilter(e.target.value)}
                     >
@@ -438,7 +438,7 @@ function App() {
                       ))}
                     </select>
                     <select
-                      className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                      className="px-3 py-2 border border-neutral-300 rounded-lg text-sm focus:ring-1 focus:ring-neutral-900 focus:border-neutral-900"
                       value={statusFilter}
                       onChange={(e) => setStatusFilter(e.target.value)}
                     >
@@ -448,7 +448,7 @@ function App() {
                       ))}
                     </select>
                     <select
-                      className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                      className="px-3 py-2 border border-neutral-300 rounded-lg text-sm focus:ring-1 focus:ring-neutral-900 focus:border-neutral-900"
                       value={tagFilter}
                       onChange={(e) => setTagFilter(e.target.value)}
                     >
@@ -471,7 +471,7 @@ function App() {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="md:col-span-2 lg:col-span-3 text-center py-8 text-gray-400"
+                  className="md:col-span-2 lg:col-span-3 text-center py-8 text-neutral-400"
                 >
                   {contacts.length === 0 ? 'No contacts added yet' : 'No contacts match the current filters'}
                 </motion.div>
@@ -483,17 +483,17 @@ function App() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -20 }}
                     transition={{ delay: index * 0.05 }}
-                    className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow"
+                    className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow border border-neutral-200"
                   >
                     <div className="p-4">
                       <div className="flex justify-between items-start mb-3">
                         <div>
-                          <h3 className="font-medium text-gray-900">{contact.name}</h3>
-                          <p className="text-sm text-gray-600">{contact.company}</p>
+                          <h3 className="font-medium text-neutral-900">{contact.name}</h3>
+                          <p className="text-sm text-neutral-600">{contact.company}</p>
                         </div>
                         <button
                           onClick={() => startEdit(index)}
-                          className="text-yellow-600 hover:text-yellow-700"
+                          className="text-neutral-400 hover:text-neutral-600"
                         >
                           ✏️
                         </button>
@@ -510,7 +510,7 @@ function App() {
                         </div>
                         
                         {contact.contactDetails && (
-                          <p className="text-sm text-gray-600">
+                          <p className="text-sm text-neutral-600">
                             📧 {contact.contactDetails}
                           </p>
                         )}
@@ -520,7 +520,7 @@ function App() {
                             {contact.tags.map((tag, tagIndex) => (
                               <span
                                 key={tagIndex}
-                                className="px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800"
+                                className="px-2 py-0.5 rounded-full text-xs font-medium bg-neutral-100 text-neutral-800"
                               >
                                 {tag}
                               </span>
